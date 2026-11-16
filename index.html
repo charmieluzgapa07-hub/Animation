@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Overlay Banner</title>
+    <title>Stream Overlay Banner with Video and Logos</title>
     <style>
         * {
             box-sizing: border-box;
@@ -30,6 +30,7 @@
             gap: 6px;
             width: 100%;
             max-width: 900px;
+            position: relative;
         }
 
         /* Live Clock Badge */
@@ -46,13 +47,13 @@
             margin-left: 15px;
             border: 1px solid #ffffff;
             transition: all 0.3s ease;
+            z-index: 2;
         }
 
-        /* Main Pill Banner Container */
+        /* Main Pill Banner Container with Video Background */
         .banner-container {
             width: 100%;
             height: 58px;
-            background: #ffffff;
             border: 2.5px solid #2d3a60;
             border-radius: 50px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -60,7 +61,31 @@
             position: relative;
             display: flex;
             align-items: center;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: border-color 0.3s ease;
+        }
+
+        /* Background Video Element */
+        .banner-bg-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Semi-transparent overlay para luminaw ang mga teksto */
+        .banner-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.82);
+            z-index: 2;
         }
 
         /* Continuous Sliding Track */
@@ -70,6 +95,8 @@
             white-space: nowrap;
             width: max-content;
             animation: continuousSlide 18s linear infinite;
+            position: relative;
+            z-index: 3;
         }
 
         @keyframes continuousSlide {
@@ -123,6 +150,11 @@
         <div id="liveClock" class="live-clock-badge">12:00:00 AM</div>
 
         <div class="banner-container" id="bannerContainer">
+            <!-- Video Background mula sa GitHub Raw Link -->
+            <video class="banner-bg-video" autoplay muted loop playsinline crossorigin="anonymous">
+                <source src="https://raw.githubusercontent.com/charmieluzgapa07-hub/Banner/main/InShot_20261116_213744251.mp4" type="video/mp4">
+            </video>
+
             <div class="slide-track" id="slideTrack">
                 <!-- Awtomatikong pupunan ng JavaScript -->
             </div>
@@ -130,17 +162,14 @@
     </div>
 
     <script>
-        // Synchronized Remote Channel
         const channel = new BroadcastChannel('banner_remote_channel');
 
-        // Default Data Structure
         const defaultData = {
             text1: "CONNECT WITH US",
             text2: "TOGETHER Church Skyline - UPC",
             text3: "TOGETHER Worship",
             textColor: "#1a1a1a",
             highlightColor: "#333333",
-            bgColor: "#ffffff",
             borderColor: "#2d3a60"
         };
 
@@ -154,18 +183,18 @@
             const clock = document.getElementById('liveClock');
             const track = document.getElementById('slideTrack');
 
-            // Apply Colors
-            container.style.backgroundColor = data.bgColor;
             container.style.borderColor = data.borderColor;
             clock.style.backgroundColor = data.borderColor;
 
-            // Render Sliding Groups
+            // Dito natin inilagay ang Facebook logo (logo1) at ang iyong logo (logo2) gamit ang GitHub raw links
             const content = `
                 <div class="slide-group">
                     <span class="text-item highlight" style="color: ${data.highlightColor}">${data.text1}</span>
-                    <img src="./logo1.png" alt="Icon 1" class="banner-icon">
+                    <img src="https://raw.githubusercontent.com/charmieluzgapa07-hub/Banner/main/fb-logo.png" alt="Facebook Logo" class="banner-icon" onerror="this.style.display='none'">
+                    <span class="separator" style="color: ${data.borderColor}">•</span>
                     <span class="text-item" style="color: ${data.textColor}">${data.text2}</span>
-                    <img src="./logo2.png" alt="Icon 2" class="banner-icon">
+                    <img src="https://raw.githubusercontent.com/charmieluzgapa07-hub/Banner/main/logo2.png" alt="Logo Namin" class="banner-icon" onerror="this.style.display='none'">
+                    <span class="separator" style="color: ${data.borderColor}">•</span>
                     <span class="text-item" style="color: ${data.textColor}">${data.text3}</span>
                     <span class="separator" style="color: ${data.borderColor}">•</span>
                 </div>
@@ -174,7 +203,6 @@
             track.innerHTML = content + content;
         }
 
-        // Listen to Remote Events
         channel.onmessage = (event) => {
             updateOverlay(event.data);
         };
@@ -183,7 +211,6 @@
             updateOverlay(getStoredData());
         });
 
-        // Live Clock
         function startLiveClock() {
             const clockElement = document.getElementById('liveClock');
             function refreshTime() {
@@ -200,7 +227,6 @@
             setInterval(refreshTime, 1000);
         }
 
-        // Initial Load
         updateOverlay(getStoredData());
         startLiveClock();
     </script>
